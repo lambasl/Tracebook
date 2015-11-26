@@ -47,6 +47,20 @@ class Postda {
     MongoFactory.getCollection("posts").update(query, obj)
   }
   
+  def addLikeToPost(id:String, user:String)={
+    val objectId: ObjectId = new ObjectId(id)
+    val query: DBObject = MongoDBObject("_id" -> objectId)
+    val obj = MongoFactory.getCollection("posts").findOne(query)
+    var likes = obj.get("likes").asInstanceOf[BasicDBList]
+    if(likes == null){
+      likes = new BasicDBList
+    }
+    likes.add(user)
+    obj.removeField("likes")
+    obj.put("likes", likes)
+    MongoFactory.getCollection("posts").update(query, obj)
+  }
+  
   
   
   private def buildMongoObject(post: Post)={

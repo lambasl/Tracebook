@@ -12,7 +12,7 @@ import org.bson.types.ObjectId
 object test {
   def main(args: Array[String]): Unit = {
     val da = new Postda
-    var o = da.addCommentToPost("56563ed0e38141327546ae99", "satbeer","test567")
+    var o = da.addLikeToPost("56563ed0e38141327546ae99", "satbeer")
     println(o)
   }
 }
