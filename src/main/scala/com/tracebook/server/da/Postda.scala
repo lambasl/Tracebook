@@ -7,6 +7,7 @@ import com.tracebook.server.utils.MongoFactory
 import com.mongodb.DBObject
 import org.bson.types.ObjectId
 import scala.collection.mutable.ArrayBuffer
+import com.mongodb.BasicDBList
 
 /**
  * @author user
@@ -18,21 +19,35 @@ class Postda {
     val id = postObj.get("_id")
     id
   }
-  
-  def getPostbyId(_id: String): DBObject = {
-    var query = MongoDBObject("_id" -> new ObjectId(_id))
-    return MongoFactory.getCollection("posts").find(query).curr()
+
+  def getPostbyId(id: String): DBObject = {
+    val objectId: ObjectId = new ObjectId(id)
+    val query: DBObject = MongoDBObject("_id" -> objectId)
+    val result = MongoFactory.getCollection("posts").findOne(query)
+    return result
+
   }
   
-  def addCommentToPost(id:String, comment: String)={
-    var query = MongoDBObject("_id" -> new ObjectId(id))
-    var obj = MongoFactory.getCollection("posts").find(query).curr()
-    var comments = obj.get("comments").asInstanceOf[ArrayBuffer[String]]
-    comments += comment
+  def addCommentToPost(id:String, user:String, comment: String)={
+    
+    val objectId: ObjectId = new ObjectId(id)
+    val query: DBObject = MongoDBObject("_id" -> objectId)
+    val obj = MongoFactory.getCollection("posts").findOne(query)
+    var comments = obj.get("comments").asInstanceOf[BasicDBList]
+    if(comments == null){
+      comments = new BasicDBList
+    }
+    var commentObj = new MongoDBObject
+    commentObj.put("user", user)
+    commentObj.put("comment", comment)
+    comments.add(commentObj)
+    
     obj.removeField("comments")
     obj.put("comments", comments)
     MongoFactory.getCollection("posts").update(query, obj)
   }
+  
+  
   
   private def buildMongoObject(post: Post)={
     val builder = MongoDBObject.newBuilder
