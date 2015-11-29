@@ -5,6 +5,7 @@ import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.DBObject
 import com.mongodb.BasicDBList
 import com.tracebook.server.utils.MongoFactory
+import org.json4s.JsonAST.JObject
 
 /**
  * @author user
@@ -37,5 +38,36 @@ object CommonDa {
     }
     null
   }
+  
+  def addUser(obj: JObject):String={
+    var user = new MongoDBObject
+    user.put("name", obj.values.get("name").get.asInstanceOf[String])
+    var coll = MongoFactory.getCollection("users")
+    coll.insert(user.underlying)
+    val id = user.get("_id").get.asInstanceOf[ObjectId]
+    id.toHexString()
+  }
+  
+  def addFriend(obj: JObject)={
+    var user = new MongoDBObject
+    val fromId = obj.values.get("from").get.asInstanceOf[String]
+    val toId = obj.values.get("to").get.asInstanceOf[String]
+    var friendObj1 = new MongoDBObject
+    friendObj1.put(toId, "")
+    findAndAppendList("users", fromId, "friends", friendObj1)
+    
+    var friendObj2 = new MongoDBObject
+    friendObj2.put(fromId, "")
+    findAndAppendList("users", toId, "friends", friendObj2)
+    
+  }
+  
+  def getProfile(uId: String):String={
+    val objectId: ObjectId = new ObjectId(uId)
+    val query: DBObject = MongoDBObject("_id" -> objectId)
+    val obj = MongoFactory.getCollection("users").findOne(query)
+    com.mongodb.util.JSON.serialize(obj)
+  }
+  
 
 }
