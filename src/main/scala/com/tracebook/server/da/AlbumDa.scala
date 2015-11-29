@@ -13,6 +13,9 @@ class AlbumDa {
     val albumObj = buildMongoObject(album)
     val result = MongoFactory.getCollection("albums").save(albumObj)
     val id = albumObj.get("_id").asInstanceOf[ObjectId]
+    var obj =   new MongoDBObject
+    obj.put(id.toHexString(), album.name)
+    CommonDa.findAndAppendList("users", album.owner, "albums", obj)
     id.toHexString()
   }
   

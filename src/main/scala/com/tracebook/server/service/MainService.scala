@@ -93,17 +93,13 @@ object MainService extends App with SimpleRoutingApp {
           }
         }
       } ~
-      path("upload" / "img") {
+      path("photo" / "add") {
         post {
-          handleWith { data: MultipartFormData =>
-            data.get("image") match {
-              case Some(imageEntity) =>
-                print(imageEntity)
-                ""
-              case None =>
-                println("no files")
-                ""
-            }
+          entity(as[JObject]){obj=>
+              complete{
+                CommonDa.addPhoto(obj)
+                "OK"
+              }
           }
         }
       }~
@@ -127,22 +123,39 @@ object MainService extends App with SimpleRoutingApp {
           }
         }
       }~
-     path(Segment/ "profile"){ id=>     
-        get{
-            complete{
+      get{
+        path(Segment/ "profile"){ id=>
+          complete{
               CommonDa.getProfile(id)
             }
-          
+        }~
+        path(Segment/ "friends"){ id=>
+          complete{
+              CommonDa.getFriends(id)
+            }
+        }~
+        path(Segment/ "photos"){ id=>
+          complete{
+              CommonDa.getphotos(id)
+            }
+        }~
+        path(Segment/ "albums"){ id=>
+          complete{
+              CommonDa.getAlbums(id)
+            }
+        }~
+        path("photo" / Segment){ id=>
+          complete{
+              CommonDa.getPhoto(id)
+            }
+        }~
+        path("posts"/ Segment){ id=>
+          complete{
+              CommonDa.getPost(id)
+            }
         }
       }
-      //curl -i 'http://localhost:8080/user/add' -X POST -H "Content-Type: application/json" -d '{"name": "shabbir"}'
-
       
-      //addFriend
-      //get profile
-      //get friendlist
-      //get likes
-      //get comments
   }
 
 }
