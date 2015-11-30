@@ -62,7 +62,7 @@ object CommonDa {
 
   }
 
-  def addPhoto(obj: JObject) = {
+  def addPhoto(obj: JObject):String ={
     val userId = obj.values.get("user").get.asInstanceOf[String]
     val pic = obj.values.get("photo").get.asInstanceOf[String]
     var picObj = new MongoDBObject
@@ -78,6 +78,7 @@ object CommonDa {
       albumId = obj.values.get("album").get.asInstanceOf[String]
       findAndAppendList("albums", albumId, "photos", userImgObj)
     }
+    imgId
   }
 
   def getProfile(userId: String): String = {
