@@ -63,7 +63,11 @@ object MainService extends App with SimpleRoutingApp {
       } ~
       path("like") {
         post {
-          parameters("id", "type", "userName", "userId") { (id, typ, userName, userId) =>
+          entity(as[JObject]) { obj =>
+            val id = obj.values.get("id").get.asInstanceOf[String]
+            val typ = obj.values.get("typ").get.asInstanceOf[String]
+            val userName = obj.values.get("userName").get.asInstanceOf[String]
+            val userId = obj.values.get("userId").get.asInstanceOf[String]
             val da = new Postda
             da.addLike(id, userId, userName, typ)
             complete {
@@ -74,7 +78,12 @@ object MainService extends App with SimpleRoutingApp {
       } ~
       path("comment") {
         post {
-          parameters("id", "type", "userName", "userId", "comment") { (id, typ, userName, userId, comment) =>
+            entity(as[JObject]) { obj =>
+            val id = obj.values.get("id").get.asInstanceOf[String]
+            val typ = obj.values.get("typ").get.asInstanceOf[String]
+            val userName = obj.values.get("userName").get.asInstanceOf[String]
+            val userId = obj.values.get("userId").get.asInstanceOf[String]
+            val comment = obj.values.get("comment").get.asInstanceOf[String]
             val da = new Postda
             da.addComment(id, userId, userName, comment, typ)
             complete {
@@ -151,6 +160,7 @@ object MainService extends App with SimpleRoutingApp {
         }~
         path("posts"/ Segment){ id=>
           complete{
+              println(id)
               CommonDa.getPost(id)
             }
         }

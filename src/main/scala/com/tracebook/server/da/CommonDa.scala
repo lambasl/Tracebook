@@ -96,6 +96,7 @@ object CommonDa {
     val objectId: ObjectId = new ObjectId(postId)
     val query: DBObject = MongoDBObject("_id" -> objectId)
     val obj = MongoFactory.getCollection("posts").findOne(query)
+    println(obj)
     com.mongodb.util.JSON.serialize(obj)
   }
 
