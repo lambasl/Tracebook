@@ -84,8 +84,9 @@ object MainService extends App with SimpleRoutingApp {
             val userName = obj.values.get("userName").get.asInstanceOf[String]
             val userId = obj.values.get("userId").get.asInstanceOf[String]
             val comment = obj.values.get("comment").get.asInstanceOf[String]
+            val encryptedKey = obj.values.get("encyptedKey").get.asInstanceOf[String]
             val da = new Postda
-            da.addComment(id, userId, userName, comment, typ)
+            da.addComment(id, userId, userName, comment, typ, encryptedKey)
             complete {
               "OK"
             }

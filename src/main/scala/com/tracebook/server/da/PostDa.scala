@@ -34,7 +34,7 @@ class Postda {
   }
  
   
-  def addComment(id:String, userId:String, userName:String, comment: String, typ: String) = {
+  def addComment(id:String, userId:String, userName:String, comment: String, typ: String, encryptedKey: String) = {
     
     val collName = CommonDa.decideType(typ)
     if(typ == null){
@@ -43,6 +43,7 @@ class Postda {
     var commentObj = new MongoDBObject
     commentObj.put(userName, userId)
     commentObj.put("comment", comment)
+    commentObj.put("encryptedKey", encryptedKey)
     CommonDa.findAndAppendList(collName, id, "comments", commentObj)    
     }
   

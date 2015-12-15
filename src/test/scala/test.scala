@@ -31,6 +31,7 @@ object test {
     val keygen =  KeyPairGenerator.getInstance("RSA")
     keygen.initialize(1024)
     val keyPair = keygen.generateKeyPair()
+    val keyPair2 = keygen.generateKeyPair()
     val pvtKey = keyPair.getPrivate;
     val pubKey = keyPair.getPublic;
     val encoder = new BASE64Encoder
