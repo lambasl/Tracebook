@@ -62,6 +62,7 @@ class Postda {
   private def buildMongoObject(post: Post)={
     val builder = MongoDBObject.newBuilder
     builder += "data" -> post.data
+    builder += "encryptedKey" -> post.encryptedKey
     builder += "user" -> post.user
     builder += "likes" -> post.likes
     builder += "comments" -> post.comments

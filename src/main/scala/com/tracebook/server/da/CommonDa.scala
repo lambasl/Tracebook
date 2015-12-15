@@ -42,6 +42,7 @@ object CommonDa {
   def addUser(obj: JObject): String = {
     var user = new MongoDBObject
     user.put("name", obj.values.get("name").get.asInstanceOf[String])
+    user.put("pubKey", obj.values.get("pubKey").get.asInstanceOf[String])
     var coll = MongoFactory.getCollection("users")
     coll.insert(user.underlying)
     val id = user.get("_id").get.asInstanceOf[ObjectId]

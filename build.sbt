@@ -1,4 +1,4 @@
-name := "tracebook"
+name := "tracebook-server"
 
 version := "1.0"
 
@@ -19,5 +19,6 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.1.2",
   "org.scalatest" %% "scalatest" % "2.2.2" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
-  "org.mongodb"   %% "casbah"    % "3.0.0"
+  "org.mongodb"   %% "casbah"    % "3.0.0",
+  "io.spray" %% "spray-json" % "1.3.1"
 )
