@@ -8,6 +8,7 @@ import com.mongodb.util.JSON
  */
 case class Album(name:String,
     owner: String,
+    permission: String,
     _id: Option[String],
     cover: Option[Array[Byte]],
     likes: Option[Array[String]],

@@ -68,6 +68,7 @@ class Postda {
     builder += "likes" -> post.likes
     builder += "comments" -> post.comments
     builder += "shares" -> post.shares
+    builder += "permission" -> post.permission
     builder.result
   }
 }

@@ -66,9 +66,11 @@ object CommonDa {
   def addPhoto(obj: JObject):String ={
     val userId = obj.values.get("user").get.asInstanceOf[String]
     val pic = obj.values.get("photo").get.asInstanceOf[String]
+    val permission = obj.values.get("permission").get.asInstanceOf[String]
     var picObj = new MongoDBObject
     picObj.put("user", userId)
     picObj.put("data", pic)
+    picObj.put("permission", permission)
     MongoFactory.getCollection("photos").insert(picObj.underlying)
     val imgId = picObj.get("_id").get.asInstanceOf[ObjectId].toHexString()
     var userImgObj = new MongoDBObject
