@@ -6,6 +6,7 @@ import com.mongodb.DBObject
 import com.mongodb.BasicDBList
 import com.tracebook.server.utils.MongoFactory
 import org.json4s.JsonAST.JObject
+import spray.json._
 
 /**
  * @author user
@@ -96,12 +97,23 @@ object CommonDa {
     obj
   }
 
-  def getPost(postId: String): String = {
+  def getPost(postId: String, userID: String): String = {
     val objectId: ObjectId = new ObjectId(postId)
     val query: DBObject = MongoDBObject("_id" -> objectId)
     val obj = MongoFactory.getCollection("posts").findOne(query)
-    println(obj)
-    com.mongodb.util.JSON.serialize(obj)
+    val keys = obj.get("encryptedKey")
+    var retObj =  new MongoDBObject
+    val keyJson = keys.toString().parseJson
+    var m = scala.collection.mutable.Map[String, String]()
+    if(keyJson.asJsObject.fields.contains(userID)){
+    retObj.put("key" ,keyJson.asJsObject.getFields(userID).head.toString())
+    retObj.put("data", obj.get("data").toString())
+    println("CommonDA:" + retObj.toString())
+    com.mongodb.util.JSON.serialize(retObj)
+    }else{
+      ""
+    }
+    
   }
 
   def getFriends(userId: String): String = {

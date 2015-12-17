@@ -26,6 +26,7 @@ import com.mongodb.util.JSON
 import spray.httpx.Json4sJacksonSupport
 import com.mongodb.DBObject
 import akka.http.scaladsl.marshalling.Marshal
+import spray.routing.Directive
 
 /**
  * @author user
@@ -84,7 +85,7 @@ object MainService extends App with SimpleRoutingApp {
             val userName = obj.values.get("userName").get.asInstanceOf[String]
             val userId = obj.values.get("userId").get.asInstanceOf[String]
             val comment = obj.values.get("comment").get.asInstanceOf[String]
-            val encryptedKey = obj.values.get("encyptedKey").get.asInstanceOf[String]
+            val encryptedKey = obj.values.get("encryptedKey").get.asInstanceOf[String]
             val da = new Postda
             da.addComment(id, userId, userName, comment, typ, encryptedKey)
             complete {
@@ -159,10 +160,10 @@ object MainService extends App with SimpleRoutingApp {
               CommonDa.getPhoto(id)
             }
         }~
-        path("posts"/ Segment){ id=>
+        path("posts"/ Segment/ Segment){ (postID, userID)=>
           complete{
-              println(id)
-              CommonDa.getPost(id)
+              println("postID=" + postID + ",UserID=" + userID)
+              CommonDa.getPost(postID, userID)
             }
         }
       }

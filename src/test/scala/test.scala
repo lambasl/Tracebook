@@ -17,7 +17,7 @@ object test {
     
     val mssg = "My Name is Satbeer.My Name is Satbeer."
     val encryptionKey = "MZygpewJsCpRrfOr"
-    val keySpec = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES")
+/*    val keySpec = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES")
     val cipher = Cipher.getInstance("AES")
     cipher.init(Cipher.ENCRYPT_MODE, keySpec)
     val encryptedBytes = cipher.doFinal(mssg.getBytes("UTF-8"))
@@ -50,6 +50,21 @@ object test {
     cipherRsa2.init(Cipher.DECRYPT_MODE, pvtKey)
     val rsaDecryptedText = cipherRsa2.doFinal(rsaText)
     println("RSA decrypted text:" + new String(rsaDecryptedText))
+*/  
+    val encoder = new BASE64Encoder
+    val decoder = new BASE64Decoder
+    val keygen =  KeyPairGenerator.getInstance("RSA")
+    keygen.initialize(1024)
+    val keyPair = keygen.generateKeyPair()
+    val cipherRsa = Cipher.getInstance("RSA")
+    cipherRsa.init(Cipher.ENCRYPT_MODE, keyPair.getPublic)
+    val e = cipherRsa.doFinal(encryptionKey.getBytes("UTF-8"))
+    val f = encoder.encode(e)
+    println(new String(f))
     
+    val cipherRsa1 = Cipher.getInstance("RSA")
+    cipherRsa1.init(Cipher.DECRYPT_MODE, keyPair.getPrivate)
+    val d = cipherRsa1.doFinal(decoder.decodeBuffer(f))
+    println(new String(d))
   }
 }
