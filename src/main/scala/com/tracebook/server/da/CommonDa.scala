@@ -64,7 +64,7 @@ object CommonDa {
 
   }
 
-  def addPhoto(obj: JObject):String ={
+  def addPhoto(obj: JObject): String = {
     val userId = obj.values.get("user").get.asInstanceOf[String]
     val pic = obj.values.get("photo").get.asInstanceOf[String]
     val permission = obj.values.get("permission").get.asInstanceOf[String]
@@ -102,18 +102,26 @@ object CommonDa {
     val query: DBObject = MongoDBObject("_id" -> objectId)
     val obj = MongoFactory.getCollection("posts").findOne(query)
     val keys = obj.get("encryptedKey")
-    var retObj =  new MongoDBObject
-    val keyJson = keys.toString().parseJson
-    var m = scala.collection.mutable.Map[String, String]()
-    if(keyJson.asJsObject.fields.contains(userID)){
-    retObj.put("key" ,keyJson.asJsObject.getFields(userID).head.toString())
-    retObj.put("data", obj.get("data").toString())
-    println("CommonDA:" + retObj.toString())
-    com.mongodb.util.JSON.serialize(retObj)
-    }else{
-      ""
+    val privacy = obj.get("permission")
+    var retObj = new MongoDBObject
+    if (privacy.toString() == "F") {
+      val keyJson = keys.toString().parseJson
+      var m = scala.collection.mutable.Map[String, String]()
+      if (keyJson.asJsObject.fields.contains(userID)) {
+        retObj.put("key", keyJson.asJsObject.getFields(userID).head.toString())
+        retObj.put("data", obj.get("data").toString())
+        println("CommonDA:" + retObj.toString())
+        com.mongodb.util.JSON.serialize(retObj)
+      } else {
+        ""
+      }
+    } else  {
+      var m = scala.collection.mutable.Map[String, String]()
+      retObj.put("key", "NA")
+      retObj.put("data", obj.get("data").toString())
+      println("CommonDA:" + retObj.toString())
+      com.mongodb.util.JSON.serialize(retObj)
     }
-    
   }
 
   def getFriends(userId: String): String = {
