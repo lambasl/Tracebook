@@ -1,6 +1,7 @@
 package com.tracebook.server.service
 
 import org.json4s.DefaultFormats
+import sun.misc.BASE64Decoder
 import org.json4s.Formats
 import org.json4s.JsonAST.JObject
 import org.json4s.jvalue2extractable
@@ -27,6 +28,9 @@ import spray.httpx.Json4sJacksonSupport
 import com.mongodb.DBObject
 import akka.http.scaladsl.marshalling.Marshal
 import spray.routing.Directive
+import javax.crypto.Cipher
+import java.security.spec.X509EncodedKeySpec
+import java.security.KeyFactory
 
 /**
  * @author user
@@ -79,7 +83,7 @@ object MainService extends App with SimpleRoutingApp {
       } ~
       path("comment") {
         post {
-            entity(as[JObject]) { obj =>
+          entity(as[JObject]) { obj =>
             val id = obj.values.get("id").get.asInstanceOf[String]
             val typ = obj.values.get("typ").get.asInstanceOf[String]
             val userName = obj.values.get("userName").get.asInstanceOf[String]
@@ -106,68 +110,91 @@ object MainService extends App with SimpleRoutingApp {
       } ~
       path("photo" / "add") {
         post {
-          entity(as[JObject]){obj=>
-              complete{
-                CommonDa.addPhoto(obj)
-                "OK"
-              }
-          }
-        }
-      }~
-      path("user"/"add"){
-        post{
-          entity(as[JObject]){obj=>
-            complete{
-              CommonDa.addUser(obj)
-              
+          entity(as[JObject]) { obj =>
+            complete {
+              CommonDa.addPhoto(obj)
+              "OK"
             }
           }
         }
-      }~
-      path("user"/"addFriend"){
-        post{
-          entity(as[JObject]){obj=>
-            complete{
+      } ~
+      path("user" / "add") {
+        post {
+          entity(as[JObject]) { obj =>
+            complete {
+              CommonDa.addUser(obj)
+
+            }
+          }
+        }
+      } ~
+      path("authenticate") {
+        post {
+          entity(as[JObject]) { obj =>
+            complete {
+              val userID = obj.values.get("userID").get.asInstanceOf[String]
+              val decoder = new BASE64Decoder
+              val publicKey = obj.values.get("publicKey").get.asInstanceOf[String].replaceAll("\\\\n", "").replaceAll("\"", "").replaceAll("\\\\", "")
+              val rawData = obj.values.get("rawData").get.asInstanceOf[String]
+              val encryptedData = obj.values.get("encryptedData").get.asInstanceOf[String].replaceAll("\\\\n", "").replaceAll("\"", "").replaceAll("\\\\", "")
+              val decodedData = decoder.decodeBuffer(encryptedData)
+              val decodedKey = decoder.decodeBuffer(publicKey)
+              val cipherRsa = Cipher.getInstance("RSA")
+              val encodedKeySpec = new X509EncodedKeySpec(decodedKey)
+              val keyFactory = KeyFactory.getInstance("RSA")
+              val newPubKey = keyFactory.generatePublic(encodedKeySpec)
+              cipherRsa.init(Cipher.DECRYPT_MODE, newPubKey)
+              val afterDecryption = new String(cipherRsa.doFinal(decodedData))
+              println("After Decryption: " + afterDecryption + " Random String: " + rawData)
+              "Done"
+            }
+          }
+        }
+      } ~
+      path("user" / "addFriend") {
+        post {
+          entity(as[JObject]) { obj =>
+            complete {
               CommonDa.addFriend(obj)
               "OK"
             }
           }
         }
-      }~
-      get{
-        path(Segment/ "profile"){ id=>
-          complete{
-              CommonDa.getProfile(id)
-            }
-        }~
-        path(Segment/ "friends"){ id=>
-          complete{
+      } ~
+      get {
+        path(Segment / "profile") { id =>
+          complete {
+            CommonDa.getProfile(id)
+          }
+        } ~
+          path(Segment / "friends") { id =>
+            complete {
               CommonDa.getFriends(id)
             }
-        }~
-        path(Segment/ "photos"){ id=>
-          complete{
+          } ~
+          path(Segment / "photos") { id =>
+            complete {
               CommonDa.getphotos(id)
             }
-        }~
-        path(Segment/ "albums"){ id=>
-          complete{
+          } ~
+          path(Segment / "albums") { id =>
+            complete {
               CommonDa.getAlbums(id)
             }
-        }~
-        path("photo" / Segment){ id=>
-          complete{
+          } ~
+          path("photo" / Segment) { id =>
+            complete {
               CommonDa.getPhoto(id)
             }
-        }~
-        path("posts"/ Segment/ Segment){ (postID, userID)=>
-          complete{
+          } ~
+          path("posts" / Segment / Segment) { (postID, userID) =>
+            complete {
               println("postID=" + postID + ",UserID=" + userID)
               CommonDa.getPost(postID, userID)
             }
-        }
+          }
       }
-      
+
   }
 
 }
