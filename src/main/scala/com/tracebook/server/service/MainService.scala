@@ -31,6 +31,8 @@ import spray.routing.Directive
 import javax.crypto.Cipher
 import java.security.spec.X509EncodedKeySpec
 import java.security.KeyFactory
+import java.util.UUID
+import spray.http.StatusCodes
 
 /**
  * @author user
@@ -43,19 +45,42 @@ object Json4sProtocol extends Json4sSupport {
 object MainService extends App with SimpleRoutingApp {
 
   import Json4sProtocol._
-
+  var sessionMap = scala.collection.mutable.Map[String, String]()
   implicit val actorSys = ActorSystem()
   startServer(interface = "localhost", port = 8080) {
-    path("page" / "create") {
+    path("login") {
       post {
-        entity(as[Page]) { obj =>
+        entity(as[JObject]) { obj =>
+          val userID = obj.values.get("userID").get.asInstanceOf[String]
+          val pass = obj.values.get("password").get.asInstanceOf[String]
+          val idOne = UUID.randomUUID()          
+          sessionMap.put(userID, idOne.toString())
           complete {
-            val da = new PageDa
-            da.savePage(obj)
+            idOne.toString()
           }
         }
       }
     } ~
+      post {
+        path("logout" / Segment) { id =>
+          complete {
+            if (sessionMap.contains(id)) {
+              sessionMap.remove(id)
+            }
+            "OK"
+          }
+        }
+      } ~
+      path("page" / "create") {
+        post {
+          entity(as[Page]) { obj =>
+            complete {
+              val da = new PageDa
+              da.savePage(obj)
+            }
+          }
+        }
+      } ~
       path("post" / "create") {
         post {
           entity(as[Post]) { obj =>
@@ -168,8 +193,15 @@ object MainService extends App with SimpleRoutingApp {
           }
         } ~
           path(Segment / "friends") { id =>
-            complete {
-              CommonDa.getFriends(id)
+            cookie("sessionCookie") { sessionCookie =>
+              complete {
+                if (sessionMap.get(id).isEmpty || sessionMap.get(id).get != sessionCookie.content) {
+                  StatusCodes.Unauthorized
+                } else {
+                  CommonDa.getFriends(id)
+                }
+              }
+
             }
           } ~
           path(Segment / "photos") { id =>
